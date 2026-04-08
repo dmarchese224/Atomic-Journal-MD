@@ -29,7 +29,6 @@ function applyTheme(t) {
 function markUnsaved() { $('#saveStatusText').textContent = 'Unsaved changes'; }
 function markSaved() { $('#saveStatusText').textContent = 'Saved'; }
 
-// The easiest, safest parser ever built. No regex allowed.
 function parseEntry(text) {
     let events = '';
     let forward = '';
@@ -40,11 +39,9 @@ function parseEntry(text) {
     const fwIdx = text.indexOf("## Looking Forward");
     
     if (evIdx !== -1 && fwIdx !== -1) {
-        // We have both sections
         events = text.slice(evIdx + 17, fwIdx).trim();
         forward = text.slice(fwIdx + 18).trim();
     } else if (evIdx !== -1) {
-        // We only have the first section
         events = text.slice(evIdx + 17).trim();
     }
     
@@ -135,7 +132,6 @@ async function openEntryForDate(dateStr) {
     $('#noFolderMsg').style.display = 'none';
     $('#entryForm').style.display = 'flex';
     
-    // Load text if file exists, otherwise clear fields
     if (state.entries[dateStr]) {
         $('#eventsText').value = state.entries[dateStr].parsed.events;
         $('#forwardText').value = state.entries[dateStr].parsed.forward;
@@ -177,7 +173,12 @@ function renderEntriesList() {
             <div class="entry-card-top"><div class="entry-card-date">${fmtDisplay(k)}</div></div>
             <div class="entry-card-preview">${preview}</div>
         `;
-        card.onclick = () => openEntryForDate(k);
+        card.onclick = () => {
+            openEntryForDate(k);
+            // Auto-close mobile menu when clicking a note from browse view
+            $('#sidebar').classList.remove('mobile-open');
+            $('#mobileBackdrop').classList.remove('visible');
+        };
         box.appendChild(card);
     });
 }
@@ -207,7 +208,12 @@ function renderMiniCal() {
         if (ds === state.activeDate) el.classList.add('selected');
         if (state.entries[ds]) el.classList.add('has-entry');
         el.textContent = d;
-        el.onclick = () => openEntryForDate(ds);
+        el.onclick = () => {
+            openEntryForDate(ds);
+            // Auto-close mobile menu when selecting a date
+            $('#sidebar').classList.remove('mobile-open');
+            $('#mobileBackdrop').classList.remove('visible');
+        };
         grid.appendChild(el);
     }
 }
@@ -228,7 +234,11 @@ document.addEventListener('DOMContentLoaded', () => {
     $('#emptyOpenFolderBtn').onclick = openFolder;
     $('#settingsOpenBtn').onclick = openFolder;
     
-    $('#todayBtn').onclick = () => openEntryForDate(todayStr());
+    $('#todayBtn').onclick = () => {
+        openEntryForDate(todayStr());
+        $('#sidebar').classList.remove('mobile-open');
+        $('#mobileBackdrop').classList.remove('visible');
+    };
     $('#saveEntryBtn').onclick = saveEntry;
     
     $('#eventsText').addEventListener('input', markUnsaved);
@@ -236,10 +246,28 @@ document.addEventListener('DOMContentLoaded', () => {
     
     $('#sidebarToggle').onclick = () => $('#sidebar').classList.toggle('collapsed');
     
+    // --- THE MISSING MOBILE WIRING ---
+    $('#mobileSidebarToggle').onclick = () => {
+        $('#sidebar').classList.add('mobile-open');
+        $('#mobileBackdrop').classList.add('visible');
+    };
+    
+    $('#mobileBackdrop').onclick = () => {
+        $('#sidebar').classList.remove('mobile-open');
+        $('#mobileBackdrop').classList.remove('visible');
+    };
+    // ---------------------------------
+    
     $$('.nav-item[data-view]').forEach(b => {
         b.onclick = () => {
             switchView(b.dataset.view);
             if (b.dataset.view === 'browse') renderEntriesList();
+            
+            // Auto-close menu on mobile if switching to editor
+            if (b.dataset.view === 'editor') {
+                $('#sidebar').classList.remove('mobile-open');
+                $('#mobileBackdrop').classList.remove('visible');
+            }
         };
     });
     
