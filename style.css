@@ -87,3 +87,54 @@ input, textarea { font: inherit; color: inherit; background: none; border: none;
 
 .toast { position: fixed; bottom: var(--space-6); right: var(--space-6); background: var(--color-text); color: var(--color-bg); padding: var(--space-3) var(--space-5); border-radius: var(--radius-lg); transform: translateY(150%); transition: transform 0.2s; }
 .toast.show { transform: translateY(0); }
+
+/* =========================================
+   RESPONSIVE DESIGN (MOBILE)
+========================================= */
+#mobileSidebarToggle {
+  display: none; /* Hidden on desktop */
+}
+
+.mobile-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 99;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-out;
+}
+
+.mobile-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media(max-width: 768px) {
+  #mobileSidebarToggle {
+    display: flex; /* Show hamburger menu */
+  }
+  
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    z-index: 100;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+    transition: transform 0.2s ease-out;
+  }
+  
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  
+  .view {
+    padding: var(--space-4);
+  }
+  
+  .journal-page {
+    padding-bottom: var(--space-8);
+  }
+}
