@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Atomic Journal — a clean, daily markdown journal">
+<meta name="theme-color" content="#01696f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Journal">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="assets/favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="assets/atomic-journal-md.svg">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<title>Atomic Journal</title>
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&f[]=cabinet-grotesk@400,500,700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="mobile-backdrop" id="mobileBackdrop"></div>
+<div id="app" class="app-shell">
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="4" width="10" height="20" rx="1.5" fill="currentColor" opacity="0.18"/>
+          <rect x="15" y="4" width="10" height="20" rx="1.5" fill="currentColor" opacity="0.32"/>
+          <line x1="13" y1="5" x2="13" y2="23" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span class="logo-text">Atomic Journal</span>
+      </div>
+      <button class="icon-btn" id="sidebarToggle"><i data-lucide="panel-left-close"></i></button>
+    </div>
+    <div class="sidebar-actions">
+      <button class="btn btn-primary btn-full" id="todayBtn"><i data-lucide="sun"></i> <span>Go to Today</span></button>
+      <button class="btn btn-secondary btn-full" id="openFolderBtn"><i data-lucide="folder-open"></i> <span>Open Folder</span></button>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-view="editor"><i data-lucide="pen-tool"></i><span>Editor</span></button>
+      <button class="nav-item" data-view="browse"><i data-lucide="library"></i><span>Browse Days</span></button>
+      <button class="nav-item" data-view="settings"><i data-lucide="settings"></i><span>Settings</span></button>
+    </nav>
+    <div class="sidebar-calendar" id="miniCalContainer">
+      <div class="cal-nav">
+        <button class="cal-btn" id="calPrev"><i data-lucide="chevron-left" style="width:14px;height:14px"></i></button>
+        <span class="cal-month" id="calMonthLabel"></span>
+        <button class="cal-btn" id="calNext"><i data-lucide="chevron-right" style="width:14px;height:14px"></i></button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div class="sidebar-footer">
+      <button class="nav-item" id="themeToggle"><i data-lucide="moon"></i><span>Toggle Theme</span></button>
+    </div>
+  </aside>
+  
+  <main id="main-content" class="main-content">
+    <header class="topbar">
+      <button class="icon-btn" id="mobileSidebarToggle"><i data-lucide="menu"></i></button>
+      <div class="topbar-search">
+        <i data-lucide="search" class="search-icon"></i>
+        <input type="search" id="quickSearch" placeholder="Search entries...">
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" id="refreshBtn" title="Reload folder"><i data-lucide="refresh-cw"></i></button>
+      </div>
+    </header>
+
+    <div class="view-container">
+      
+      <section id="view-editor" class="view active">
+        <div class="journal-page">
+          <div id="noFolderMsg" class="empty-state">
+            <div class="empty-icon"><i data-lucide="folder-open"></i></div>
+            <h3>Open your journal folder</h3>
+            <p>Choose a local folder to save your daily markdown files.</p>
+            <button class="btn btn-primary" id="emptyOpenFolderBtn"><i data-lucide="folder-open"></i> Open Folder</button>
+          </div>
+          
+          <div id="entryForm" style="display:none;flex-direction:column;gap:var(--space-6)">
+            <div class="entry-date-banner" style="border-bottom: 1px solid var(--color-divider); padding-bottom: var(--space-4);">
+              <h1 id="entryDateDisplay" class="view-title"></h1>
+              <div style="font-size:var(--text-xs);color:var(--color-text-faint);margin-top:8px">
+                <i data-lucide="file-text" style="width:12px;height:12px;vertical-align:middle;margin-right:4px"></i>
+                <span id="entryFilename"></span>
+              </div>
+            </div>
+
+            <div class="field-container">
+              <h2 class="field-label">Today's Events</h2>
+              <textarea id="eventsText" class="simple-textarea" placeholder="What happened today?"></textarea>
+            </div>
+
+            <div class="field-container">
+              <h2 class="field-label">Looking Forward</h2>
+              <textarea id="forwardText" class="simple-textarea" placeholder="What's coming up?"></textarea>
+            </div>
+
+            <div class="save-bar">
+              <div class="save-status" id="saveStatus"><i data-lucide="circle-dashed"></i><span id="saveStatusText">Unsaved</span></div>
+              <button class="btn btn-primary" id="saveEntryBtn"><i data-lucide="save"></i> Save Entry</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <section id="view-browse" class="view">
+        <div class="view-header">
+          <div class="view-header-left">
+            <h1 class="view-title">Browse Days</h1>
+            <div class="view-subtitle" id="browseSubtitle">All entries</div>
+          </div>
+        </div>
+        <div class="entries-grid" id="entriesList"></div>
+      </section>
+
+      <section id="view-settings" class="view">
+        <div class="view-header"><h1 class="view-title">Settings</h1></div>
+        <div class="settings-body">
+          <div class="settings-card">
+            <h2 class="settings-section-title">Journal Folder</h2>
+            <div class="folder-info"><i data-lucide="folder"></i><span id="folderPath">No folder selected</span></div>
+            <button class="btn btn-primary" id="settingsOpenBtn" style="margin-top:1rem;"><i data-lucide="folder-open"></i> Choose Folder</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
+<script>if ('serviceWorker' in navigator) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {})); }</script>
+</body>
+</html>
